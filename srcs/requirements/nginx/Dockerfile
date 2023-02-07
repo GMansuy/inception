@@ -13,3 +13,4 @@ RUN openssl req -x509 -nodes -out /etc/nginx/ssl/public.crt -keyout /etc/nginx/s
 COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 
 #ENTRYPOINT ["service", "nginx", "start"]
+CMD ["nginx", "-g", "daemon off;"]
