@@ -6,14 +6,14 @@ services:
     image: nginx
     build:
       context: requirements/nginx
-      #   container_name: nginx
-      #    restart: on-failure
-      #    volumes:
-      #      - wordpress:/var/www/wordpress
-      #   networks:
-      #     - inception
+    container_name: nginx
+    restart: on-failure
+        #volumes:
+        #- wordpress:/var/www/wordpress
+          # networks:
+          #- inception
     ports:
       - "443:443"
-#   depends_on:
-#     wordpress:
-#       condition: service_started
+    depends_on:
+      wordpress:
+        condition: service_started
