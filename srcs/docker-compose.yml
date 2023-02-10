@@ -2,18 +2,63 @@ version: '3'
 
 services:
 
+  mariadb:
+    image: mariadb
+    build:
+      context: requirements/mariadb
+    container_name: mariadb
+    volumes:
+      - mariadb:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - inception
+    expose:
+     - "3306"
+
+  wordpress:
+    image: wordpress
+    build:
+      context: requirements/wordpress
+    container_name: wordpress
+    volumes:
+      - wordpress:/var/www/wordpress
+    restart: on-failure
+    depends_on:
+      - mariadb
+    networks:
+      - inception
+    expose:
+     - "9000"
+
   nginx:
     image: nginx
     build:
       context: requirements/nginx
     container_name: nginx
     restart: on-failure
-        #volumes:
-        #- wordpress:/var/www/wordpress
-          # networks:
-          #- inception
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
     ports:
       - "443:443"
     depends_on:
-      wordpress:
-        condition: service_started
+      - wordpress
+
+volumes:
+  wordpress:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/gmansuy/data/wordpress'
+  mariadb:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/gmansuy/data/mariadb'
+  
+networks:
+  inception:
+    driver: bridge

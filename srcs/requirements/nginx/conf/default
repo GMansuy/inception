@@ -1,17 +1,11 @@
-events {
-        worker_connections 768;
-        # multi_accept on;
-}
-
-http {
-	server {
+server {
         listen          443 ssl default_server;
         listen          [::]:443 ssl default_server;
-	ssl_certificate /etc/nginx/ssl/public.crt;
+        ssl_certificate /etc/nginx/ssl/public.crt;
         ssl_certificate_key /etc/nginx/ssl/private.key;
         ssl_protocols   TLSv1.2 TLSv1.3;
 
-        root /var/www/html;
+        root /var/www/wordpress;
 
         index index.php index.html index.htm;
 
@@ -23,5 +17,4 @@ http {
                 include snippets/fastcgi-php.conf;
                 fastcgi_pass wordpress:9000;
         }
-}
 }
