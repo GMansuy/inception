@@ -1,12 +1,12 @@
-FROM debian:buster
+FROM	debian:buster
 
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get install mariadb-server -y
+RUN	apt update -y; apt upgrade -y;
 
-RUN sed -i "s/#port/port/g" /etc/mysql/mariadb.conf.d/50-server.cnf
-RUN sed -i "s/127.0.0.1/*/g" /etc/mysql/mariadb.conf.d/50-server.cnf
-COPY conf/setup_mariadb.sh /
-RUN chmod 111 /setup_mariadb.sh && /setup_mariadb.sh
+RUN	apt install -y mariadb-server neovim;
 
-CMD ["mysqld_safe"]
+COPY	./tools /var/www
+COPY	./conf /etc/mysql/mariadb.conf.d/
+
+RUN	service mysql start && mysql < /var/www/install.sql;
+
+ENTRYPOINT ["mysqld"]

@@ -1,18 +1,19 @@
 FROM debian:buster
 
-RUN apt-get update
-RUN apt-get upgrade -y
+RUN	apt update; apt upgrade -y;
 
-RUN apt-get install nginx -y
-RUN apt-get install vim -y
+RUN	apt install -y nginx openssl neovim ;
 
-RUN apt-get install openssl -y
-RUN mkdir /etc/nginx/ssl
-RUN openssl req -x509 -nodes -out /etc/nginx/ssl/public.crt -keyout /etc/nginx/ssl/private.key -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=gmansuy.42.fr/UID=gmansuy"
+COPY	./conf/default /etc/nginx/sites-available/
+COPY	./conf/ssl-params.conf /etc/nginx/snippets/
+COPY	./conf/self-signed.conf /etc/nginx/snippets/
+COPY	./tools/nginx-selfsigned.crt /etc/ssl/certs/
+COPY	./tools/nginx-selfsigned.key /etc/ssl/private/
 
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
-#COPY ./conf/default /etc/nginx/sites-available/
-RUN chmod 777 /var/www/wordpress
-RUN chown -R www-data:www-data /var/www/wordpress
+RUN	mkdir -p /var/www/wordpress
 
-CMD exec nginx -g  "daemon off;"
+RUN	    openssl dhparam -out /etc/nginx/dhparam.pem 4096
+
+ENTRYPOINT	["/bin/bash", "-c", "nginx -g 'daemon off;'"]
+
+CMD	["/bin/bash/"]

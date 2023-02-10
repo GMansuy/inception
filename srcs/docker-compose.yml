@@ -8,7 +8,7 @@ services:
     volumes:
       - wordpress:/var/www/wordpress
     networks:
-      - my-net
+      - inception
     restart: unless-stopped
 
   wordpress:
@@ -18,17 +18,17 @@ services:
     volumes:
       - wordpress:/var/www/wordpress
     networks:
-      - my-net
+      - inception
     restart: unless-stopped
         
-  db:
-    container_name: db
-    image: db
+  mariadb:
+    container_name: mariadb
+    image: mariadb
     build: ./requirements/mariadb/
     volumes:
-      - db:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     networks:
-      - my-net
+      - inception
     restart: unless-stopped
 
 volumes:
@@ -37,15 +37,15 @@ volumes:
     driver_opts:
       type: "local"
       o: bind
-      device: /home/anaouadi/data/wordpress
-  db:
-    name: db
+      device: /home/gmansuy/data/wordpress
+  mariadb:
+    name: mariadb
     driver_opts:
       type: "local"
       o: bind
-      device: /home/anaouadi/data/db
+      device: /home/gmansuy/data/mariadb
 
 networks:
-  my-net:
-    name: my-net
+  inception:
+    name: inception
     driver: bridge
