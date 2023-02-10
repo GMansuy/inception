@@ -5,6 +5,8 @@ services:
     container_name: nginx
     image: nginx
     build: ./requirements/nginx/
+    depends_on:
+      - wordpress
     ports:
       - "443:443"
     volumes:
@@ -17,11 +19,15 @@ services:
     container_name: wordpress
     image: wordpress
     build: ./requirements/wordpress/
+    depends_on:
+      - mariadb
     volumes:
       - wordpress:/var/www/wordpress
     networks:
       - inception
     restart: unless-stopped
+    expose:
+      - "9000"
         
   mariadb:
     container_name: mariadb
@@ -32,6 +38,8 @@ services:
     networks:
       - inception
     restart: unless-stopped
+    expose:
+      - "3306"
 
 volumes:
   wordpress:
