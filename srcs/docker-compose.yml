@@ -1,58 +1,63 @@
 version: '3'
 
 services:
-  nginx:
-    container_name: nginx
-    image: nginx
-    build: ./requirements/nginx/
-    depends_on:
-      - wordpress
-    ports:
-      - "443:443"
-    volumes:
-      - wordpress:/var/www/wordpress
-    networks:
-      - inception
-    restart: unless-stopped
-
-  wordpress:
-    container_name: wordpress
-    image: wordpress
-    build: ./requirements/wordpress/
-    depends_on:
-      - mariadb
-    volumes:
-      - wordpress:/var/www/wordpress
-    networks:
-      - inception
-    restart: unless-stopped
-    expose:
-      - "9000"
-        
   mariadb:
-    container_name: mariadb
     image: mariadb
-    build: ./requirements/mariadb/
+    env_file: .env
+    build:
+      context: ./mariadb
+      args:
+        DB_DB: "wordpress"
+        DB_USER: "gmansuy"
+        DB_PASS: "123"
+    container_name: mariadb
+    restart: on-failure
     volumes:
       - mariadb:/var/lib/mysql
     networks:
       - inception
-    restart: unless-stopped
-    expose:
-      - "3306"
 
-volumes:
+  nginx:
+    image: nginx
+    build: ./nginx
+    container_name: nginx
+    restart: on-failure
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
+    ports:
+      - "443:443"
+    depends_on:
+      wordpress:
+        condition: service_started
+
   wordpress:
-    driver_opts:
-      type: "local"
-      o: bind
-      device: /home/gmansuy/data/wordpress
-  mariadb:
-    driver_opts:
-      type: "local"
-      o: bind
-      device: /home/gmansuy/data/mariadb
+    image: wordpress
+    env_file: .env
+    build: ./wordpress
+    container_name: wordpress
+    restart: on-failure
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
+    depends_on:
+      mariadb:
+        condition: service_started
 
 networks:
   inception:
     driver: bridge
+
+volumes:
+  mariadb:
+    driver_opts:
+      type: none
+      device: /home/gmansuy/data/mariadb
+      o: bind
+  wordpress:
+    driver_opts:
+      type: none
+      device: /home/gmansuy/data/wordpress
+      o: bind

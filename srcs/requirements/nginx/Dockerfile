@@ -1,19 +1,12 @@
 FROM debian:buster
+EXPOSE 443
 
-RUN	apt update; apt upgrade -y;
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get -y install nginx
+RUN apt-get -y install openssl
 
-RUN	apt install -y nginx openssl neovim ;
+RUN openssl req -x509 -nodes -days 365 -subj "/C=FR/ST=France/L=Lyon/O=42/OU=42/CN=jcambaki" -newkey rsa:4096 -keyout /etc/ssl/nginx-selfsigned.key -out /etc/ssl/nginx-selfsigned.crt;
+COPY ./conf/default etc/nginx/sites-enabled/default
 
-COPY	./conf/default /etc/nginx/sites-available/
-COPY	./conf/ssl-params.conf /etc/nginx/snippets/
-COPY	./conf/self-signed.conf /etc/nginx/snippets/
-COPY	./tools/nginx-selfsigned.crt /etc/ssl/certs/
-COPY	./tools/nginx-selfsigned.key /etc/ssl/private/
-
-RUN	mkdir -p /var/www/wordpress
-
-RUN	    openssl dhparam -out /etc/nginx/dhparam.pem 4096
-
-ENTRYPOINT	["/bin/bash", "-c", "nginx -g 'daemon off;'"]
-
-CMD	["/bin/bash/"]
+CMD ["nginx", "-g", "daemon off;"]

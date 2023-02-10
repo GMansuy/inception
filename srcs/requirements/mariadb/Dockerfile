@@ -1,12 +1,21 @@
-FROM	debian:buster
+FROM debian:buster
+EXPOSE 3306
 
-RUN	apt update -y; apt upgrade -y;
+#ARG DB_DB
+#ARG DB_USER
+#ARG DB_PASS
 
-RUN	apt install -y mariadb-server neovim;
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get -y install mariadb-server
 
-COPY	./tools/install.sql /var/www/install.sql
-COPY	./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/
+COPY conf/db.sql /
+#RUN sed -i "s/DB_DB/$DB_DB/g" /db.sql
+#RUN sed -i "s/DB_USER/$DB_USER/g" /db.sql
+#RUN sed -i "s/DB_PASS/$DB_PASS/g" /db.sql
 
-RUN	service mysql start && mysql < /var/www/install.sql;
+RUN service mysql start && mysql < db.sql
+RUN rm -f db.sql
 
-ENTRYPOINT ["mysqld"]
+CMD ["mysqld"]

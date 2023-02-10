@@ -1,26 +1,28 @@
-FROM	debian:buster
+FROM debian:buster
 
-RUN	apt update -y; apt upgrade -y;
+# Set up port forwarding
+EXPOSE 9000
 
-RUN	apt install -y php-fpm php-mysql neovim wget curl;
+# Install base components
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get -y install php7.3 php-mysqli php-fpm mariadb-client
+RUN apt-get -y install wget curl
 
-WORKDIR	/var/www/
-RUN	["wget", "https://wordpress.org/latest.tar.gz"]
-RUN	["tar", "xf", "latest.tar.gz"]
+# Set up FPM config
+COPY ./conf/www.conf /etc/php/7.3/fpm/pool.d
+RUN mkdir /run/php/
 
 # Install wordpress CLI tool
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
-COPY	./conf/www.conf /etc/php/7.3/fpm/pool.d/
+# Create wordpress working directory
+RUN mkdir -p /var/www/wordpress
+WORKDIR /var/www/wordpress
 
-RUN		mkdir -p /run/php/
+COPY ./conf/tool.sh ./
+RUN chmod +x tool.sh
 
-#COPY	./conf/wp-config.php ./wordpress
-#ENTRYPOINT	["/bin/bash", "-c", "php-fpm7.3 -F -R"]
-
-COPY ./tools/wp.sh ./
-RUN chmod +x wp.sh
-
-CMD ["./wp.sh"]
+CMD ["./tool.sh"]
