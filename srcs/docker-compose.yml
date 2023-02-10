@@ -1,3 +1,5 @@
+version: '3'
+
 services:
   nginx:
     container_name: nginx
@@ -33,13 +35,11 @@ services:
 
 volumes:
   wordpress:
-    name: wordpress
     driver_opts:
       type: "local"
       o: bind
       device: /home/gmansuy/data/wordpress
   mariadb:
-    name: mariadb
     driver_opts:
       type: "local"
       o: bind
@@ -47,5 +47,4 @@ volumes:
 
 networks:
   inception:
-    name: inception
     driver: bridge
