@@ -1,64 +1,51 @@
-version: '3'
-
 services:
-
-  mariadb:
-    image: mariadb
-    build:
-      context: requirements/mariadb
-    container_name: mariadb
-    volumes:
-      - mariadb:/var/lib/mysql
-    restart: unless-stopped
-    networks:
-      - inception
-    expose:
-     - "3306"
-
-  wordpress:
-    image: wordpress
-    build:
-      context: requirements/wordpress
-    container_name: wordpress
-    volumes:
-      - wordpress:/var/www/wordpress
-    restart: on-failure
-    depends_on:
-      - mariadb
-    networks:
-      - inception
-    expose:
-     - "9000"
-
   nginx:
-    image: nginx
-    build:
-      context: requirements/nginx
     container_name: nginx
-    restart: on-failure
-    volumes:
-      - wordpress:/var/www/wordpress
-    networks:
-      - inception
+    image: nginx
+    build: ./requirements/nginx/
     ports:
       - "443:443"
-    depends_on:
-      - wordpress
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - my-net
+    restart: unless-stopped
+
+  wordpress:
+    container_name: wordpress
+    image: wordpress
+    build: ./requirements/wordpress/
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - my-net
+    restart: unless-stopped
+        
+  db:
+    container_name: db
+    image: db
+    build: ./requirements/mariadb/
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - my-net
+    restart: unless-stopped
 
 volumes:
   wordpress:
-    driver: local
+    name: wordpress
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/gmansuy/data/wordpress'
-  mariadb:
-    driver: local
+      type: "local"
+      o: bind
+      device: /home/anaouadi/data/wordpress
+  db:
+    name: db
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/gmansuy/data/mariadb'
-  
+      type: "local"
+      o: bind
+      device: /home/anaouadi/data/db
+
 networks:
-  inception:
+  my-net:
+    name: my-net
     driver: bridge
