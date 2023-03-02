@@ -1,18 +1,21 @@
-FROM debian:buster
+FROM	debian:buster
 
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get install nginx -y
-RUN apt-get install vim -y
+#install nginx and openssl packages
+RUN 	apt-get update && \
+	 	apt-get install -y nginx openssl
 
-RUN mkdir -p /etc/nginx/ssl
-RUN apt-get install openssl -y
-RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=gmansuy.42.fr/UID=gmansuy"
+#put my own nginx configuration to nginx
+COPY	./conf/nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN mkdir -p /var/run/nginx
-COPY conf/nginx.conf /etc/nginx/nginx.conf
+#create the folder to the certificate for https protocole
+RUN		mkdir /etc/nginx/ssl
 
-RUN chmod 755 /var/www/html
-RUN chown -R www-data:www-data /var/www/html
+#run openssl with the key and the certificate
+RUN		openssl req -x509 -nodes -days 365 -newkey rsa:4096 \
+		-out /etc/nginx/ssl/gmansuy.crt \
+ 		-keyout /etc/nginx/ssl/gmansuy.key \
+		-subj "/C=FR/ST=IDF/L=Paris/O=42/OU=gmansuy/CN=gmansuy.42.fr";
 
-CMD [ "nginx", "-g", "daemon off;" ]
+EXPOSE 443
+
+CMD	[ "nginx", "-g", "daemon off;" ]
